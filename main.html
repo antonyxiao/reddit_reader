@@ -1,0 +1,85 @@
+<html>
+<head>
+    <title>Reddit Reader</title>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="navbar">
+        <input id="subreddit" type='text' placeholder="Subreddit name"/>
+        <label>Sort:
+            <select id="sort" name="dropdown">
+                <option value="hot" selected="selected">Hot</option>
+                <option value="new">New</option>
+                <option value="new">Rising</option>
+                <option value="controversial">Controversial</option>
+                <option value="top">Top</option>
+                <option value="gilded">Gilded</option>
+            </select>
+        </label>
+
+        <label>Post limit:
+            <select id="limit" name="dropdown">
+                <option value="10">10</option>
+                <option value="25" selected="selected">25</option>
+                <option value="50">50</option>
+                <option value="75">75</option>
+                <option value="100">100</option>
+            </select>
+        </label>
+
+        <label>Show images
+            <input type="checkbox" id="showImage"/>
+        </label>
+        <label>| Dark mode
+            <input type="checkbox" id="darkmode"/>
+        </label>
+
+        <label>| Image size:
+          <input type="range" min="1" max="100" value="30" id="imagesize">
+        </label>
+
+        <label>| Window size:
+          <input type="range" min="2" max="100" value="50" id="windowsize">
+        </label>
+
+         <button type="button" onclick="collapse()" id="windowBtn">Collapse window</button>
+    </div>
+
+
+<div id="container">
+   <div class="left" id="content"></div>
+   <div class="right" id="comments">
+      <div id="intro">
+            <h1 style="display: inline">Reddit Reader</h1> <p style="display: inline"><i>a minimalistic reader</i></p>
+            <br><br>
+            <p>By default, it displays the home page of Reddit</p>
+            <p>To go to a subreddit, enter the name of the subreddit into the search bar at the top left</p>
+            <p>To enter a post and view its comments, press on its title and the post will appear in this window</p>
+            <p>The hyperlinked title of a post in this window will redirect to the Reddit post in a new tab</p>
+            <p>Post comments are always sorted by "best"</p>
+            <p>To sort the posts, use the &quot;Sort&quot; drop down menu</p>
+            <p>To choose the number of posts to be displayed, use the &quot;Post limit&quot; drop down menu</p>
+            <p>Select &quot;Show images&quot; to display images</p>
+            <p>Videos are currently not supported and &quot;Failed to load&quot; will be shown</p>
+            <p>Select &quot;Dark mode&quot; to enter dark mode</p>
+            <p>Use the &quot;Image size&quot; slider to adjust image sizes</p>
+            <p>Use the &quot;Window size&quot; slider to adjust the size of the two windows</p>
+            <p>Both windows scroll independently</p>
+            <p>"404 Not Found" or "CORS header 'Access-Control-Allow-Origin' missing" errors may appear in the console due to the nature of the search and get functions and will not impair functionality.</p>
+            <p><br></p>
+        </div>
+   </div>
+</div>
+
+
+
+    <!-- <input id="" type='text'/> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js" type="text/javascript"></script>
+    <script src="renderjson.js"></script>
+    <script src="script.js"></script>
+
+</body>
+</html>
