@@ -26,6 +26,8 @@ $(document).ready(function(){
 var darkModeOn = false;
 var windowState = $('#windowsize').val();
 var commentStr = '';
+
+// preorder current node depth / comment depth
 var currentHeight = -1;
 
 function load() {
@@ -36,7 +38,7 @@ function load() {
 
     if (subreddit.length > 0) {
         subreddit = 'r/' + subreddit;
-    }
+    }// if
 
     $.getJSON('https://www.reddit.com/' + subreddit + '/' + sort + '/.json' + '?limit=' + limit, function(data){
         json = data;
@@ -54,6 +56,7 @@ function load() {
         var finalString = "";
         var titleResults = "";
         var selfTextResults = "";
+
         for (var i=0; i<children.length; i++) {
             var data = children[i].data;
 
@@ -63,22 +66,40 @@ function load() {
             var date = d.getFullYear() + '/' + (d.getMonth()+1) + '/' + d.getDate() + ' | ' + hours + ':' + minutes;
             // ' <a target="_blank" href=\"' + data.url + '\">'
             var url = data.permalink;
+            
             titleResults = '<div class="title" onclick="loadComment(\''+ url + '\')"><pre>' + data.score + '</pre> <h4>' + data.title + '</h4> <pre>' + data.num_comments + ' comments | ' + date + '</pre></div>';
-            selfTextResults = '<p class="selftext">' + data.selftext + '</p>'
-            selfTextResults = linkify(selfTextResults);
+
+            if (data.selftext_html == null) {
+                selfTextResults = '<p class="selftext">' + data.selftext + '</p>'
+            } else {
+                var txt = document.createElement("textarea");
+                txt.innerHTML = data.selftext_html
+                console.log(txt.value)
+                var final_selftext = txt.value.replace('<!-- SC_OFF --><div class="md"><p>','');
+                final_selftext = final_selftext.replace('</p></div><!-- SC_ON -->','');
+                selfTextResults = '<p class="selftext">' + final_selftext + '</p>'
+            }
+
+            // surround links in attribute tags
+            // selfTextResults = linkify(selfTextResults);
             finalString += titleResults + selfTextResults;
+
             if (typeof data.url_overridden_by_dest != 'undefined' && $('#showImage').prop("checked")) {
                 // onerror="this.onerror=null; this.src=\'' + data.thumbnail + '\'"
                 finalString += '<img alt="Failed to load" class="images" src=' + data.url_overridden_by_dest + '></img><br><br>';
-            }
-            finalString += '<hr>';
+            }// if
+
+            finalString += '<hr id="separator">';
+
             $('#content').html(finalString);
+
             if (darkModeOn == true) {
                 $('a').css('color', 'rgb(54, 154, 255)');
-            }
+            }// if
+
             resizeImage();
             resizeWindows();
-        }
+        }// for
     });
 }// load
 
@@ -94,7 +115,7 @@ function loadComment(url){
     .fail(function(jqxhr, event, exception) {
         if (jqxhr.status == 404) {
             $('#content').html(exception);
-        }
+        }// if
     })
     .done(function() {
         $('#comments').html('');
@@ -117,14 +138,14 @@ function loadComment(url){
         if (typeof post.url_overridden_by_dest != 'undefined') {
             // onerror="this.onerror=null; this.src=\'' + data.thumbnail + '\'"
             finalString += '<img alt="Failed to load" class=\'images\' src=' + post.url_overridden_by_dest + '></img><br><br>';
-        }
+        }// if
 
         // console.log(comments);
         var commentsChildren = comments.data.children;
         // console.log('length: '+commentsChildren.length);
         currentHeight = -1;
         for (var i=0; i<commentsChildren.length; i++) {
-            commentStr += '<hr>';
+            commentStr += '<hr id="separator">';
             currentHeight = -1;
             preorder(commentsChildren[i]);
         }// for
@@ -138,8 +159,6 @@ function loadComment(url){
         resizeImage();
     });
 }
-
-
 
 function preorder(root) {
     currentHeight++;
@@ -180,8 +199,13 @@ function darkMode() {
         $('a').css('color', 'rgb(0, 0, 238)');
         darkModeOn = false;
     }
-}
+}// darkMode
 
+
+/*
+ * collapses the right window
+ *
+ */ 
 function collapse(){
     if ($('#windowsize').val() != 100) {
         $('#windowBtn').html('Open window');
@@ -191,26 +215,43 @@ function collapse(){
         $('#windowBtn').html('Collapse window');
         $('#windowsize').val(windowState);
         resizeWindows();
-    }
-}
+    }// else
+}// collapse
 
+
+/*
+ * resizes the images
+ *
+ */
 function resizeImage() {
     var imageSize = ($('#imagesize').val()) * 10;
     $('img').css('height', imageSize);
-}
+}// resizeImage
 
+
+/*
+ * changes the size of the windows
+ *
+ */
 function resizeWindows() {
     var windowSize = $('#windowsize').val();
+
     if (windowSize < 100) {
         windowState = windowSize;
         $('#windowBtn').html('Collapse window');
     } else {
         $('#windowBtn').html('Open window');
-    }
+    }// else
+
     $('.left').css('width', windowSize+'%');
     $('.right').css('width', (100-windowSize)+'%');
-}
+}// resizeWindows
 
+
+/* 
+ * Adds and return Attribute tag <a> to links in strings
+ * 
+ */
 function linkify(inputText) {
     var replacedText, replacePattern1, replacePattern2, replacePattern3;
 
@@ -227,4 +268,4 @@ function linkify(inputText) {
     replacedText = replacedText.replace(replacePattern3, '<a href="mailto:$1">$1</a>');
 
     return replacedText;
-}
+}// linkify
