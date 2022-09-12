@@ -1,6 +1,29 @@
-// on load
+/* Reddit Reader
+ * @author: Antony Xiao
+ * 
+ * Last change: Sept 10, 2022
+ * - Added indenting comment tree
+ * - CSS margin changes
+ * - use body.html for comments with surrounding tags removed
+ * - fix thread header wrapping, no space during wrap
+ *
+ * Sept 9, 2022
+ * - Use selftext.html if it exists
+ * - Improved separation <hr> lines
+ * - Fixed dark-mode to light-mode css not changing
+ *
+ *
+ * Future plans:
+ * - Comment left border should be white in dark mode
+ * - Collapsable comments
+ * - selftext_html displaying entity html on right side
+ * - add points and user to comments
+ */
+
+
+// run on load
 $(document).ready(function(){
-    load();
+    load(); // main threads
     $(document).on('input', '#subreddit, #sort, #limit', function() {
         load();
     });
@@ -20,7 +43,7 @@ $(document).ready(function(){
     $('#showImage').click(function() {
         load();
     });
-});
+});// ready
 
 // global
 var darkModeOn = false;
@@ -40,13 +63,14 @@ function load() {
         subreddit = 'r/' + subreddit;
     }// if
 
+    // REST api call
     $.getJSON('https://www.reddit.com/' + subreddit + '/' + sort + '/.json' + '?limit=' + limit, function(data){
         json = data;
     })
     .fail(function(jqxhr, event, exception) {
         if (jqxhr.status == 404) {
             $('#content').html(exception);
-        }
+        }// if
     })
     .done(function() {
         var children = json.data.children;
@@ -67,18 +91,9 @@ function load() {
             // ' <a target="_blank" href=\"' + data.url + '\">'
             var url = data.permalink;
             
-            titleResults = '<div class="title" onclick="loadComment(\''+ url + '\')"><pre>' + data.score + '</pre> <h4>' + data.title + '</h4> <pre>' + data.num_comments + ' comments | ' + date + '</pre></div>';
+            titleResults = '<div class="title" onclick="loadComment(\''+ url + '\')"><h4>' + data.title + '</h4><br><pre class="thread_info">' + data.score + ' | ' + data.num_comments + ' comments | ' + date + '</pre></div>';
 
-            if (data.selftext_html == null) {
-                selfTextResults = '<p class="selftext">' + data.selftext + '</p>'
-            } else {
-                var txt = document.createElement("textarea");
-                txt.innerHTML = data.selftext_html
-                console.log(txt.value)
-                var final_selftext = txt.value.replace('<!-- SC_OFF --><div class="md"><p>','');
-                final_selftext = final_selftext.replace('</p></div><!-- SC_ON -->','');
-                selfTextResults = '<p class="selftext">' + final_selftext + '</p>'
-            }
+            selfTextResults = getSelfText(data.selftext, data.selftext_html);
 
             // surround links in attribute tags
             // selfTextResults = linkify(selfTextResults);
@@ -86,7 +101,7 @@ function load() {
 
             if (typeof data.url_overridden_by_dest != 'undefined' && $('#showImage').prop("checked")) {
                 // onerror="this.onerror=null; this.src=\'' + data.thumbnail + '\'"
-                finalString += '<img alt="Failed to load" class="images" src=' + data.url_overridden_by_dest + '></img><br><br>';
+                finalString += '<img alt="Failed to load" class="images" src=' + data.url_overridden_by_dest + '></img>';
             }// if
 
             finalString += '<hr id="separator">';
@@ -100,6 +115,9 @@ function load() {
             resizeImage();
             resizeWindows();
         }// for
+
+        // fixes not scrolling to the end
+        $('#content').append('<br><br>');
     });
 }// load
 
@@ -107,17 +125,23 @@ var currentHeight;
 var maxHeight;
 
 function loadComment(url){
+    // api url
     url = 'https://www.reddit.com' + url;
-    var json;
+
+    var json; // stores the json files retrieved from api url
+
+    // REST api
     $.getJSON(url + '.json', function(data){
-        json=data;
-    })
+        json = data;
+    })// getJSON
     .fail(function(jqxhr, event, exception) {
         if (jqxhr.status == 404) {
             $('#content').html(exception);
         }// if
-    })
-    .done(function() {
+    })// failed fetch
+    .done(function() { // fetch success
+
+        console.log(json);
         $('#comments').html('');
         commentStr = '';
         var post = json[0].data.children[0].data;
@@ -126,18 +150,36 @@ function loadComment(url){
         var finalString = "";
         var titleResults = "";
         var selfTextResults = "";
+
+        /* date */
         var d = new Date(post.created*1000);
         var hours = (d.getHours() < 10) ? '0' + d.getHours(): d.getHours();
         var minutes = (d.getMinutes() < 10) ? '0' + d.getMinutes(): d.getMinutes();
         var date = d.getFullYear() + '/' + (d.getMonth()+1) + '/' + d.getDate() + ' | ' + hours + ':' + minutes;
+
         // ' <a target="_blank" href=\"' + data.url + '\">'
+        
         titleResults = '<h4><a target="_blank" href="' + url + '">' + post.title + '</a></h4> <pre>' + post.score + ' | ' + post.num_comments + ' comments | ' + date + '</pre>';
-        selfTextResults = '<p class="selftext">' + post.selftext + '</p>'
-        selfTextResults = linkify(selfTextResults);
+
+        /* issue */
+        /* WTF? redundant code */
+        /* tag is added when innerHTML is empty */
+        /* 
+        if (post.selftext) {
+            console.log('selftext');
+            selfTextResults = '<p class="selftext">' + post.selftext + '</p>'
+        } else {
+            console.log('no selftext');
+        }
+        */
+        /* obsolete */
+        // selfTextResults = linkify(selfTextResults);
+
+        selfTextResults = '<br>' + post.selftext;
         finalString += titleResults + selfTextResults;
         if (typeof post.url_overridden_by_dest != 'undefined') {
             // onerror="this.onerror=null; this.src=\'' + data.thumbnail + '\'"
-            finalString += '<img alt="Failed to load" class=\'images\' src=' + post.url_overridden_by_dest + '></img><br><br>';
+            finalString += '<img alt="Failed to load" class=\'images\' src=' + post.url_overridden_by_dest + '></img>';
         }// if
 
         // console.log(comments);
@@ -146,7 +188,7 @@ function loadComment(url){
         currentHeight = -1;
         for (var i=0; i<commentsChildren.length; i++) {
             commentStr += '<hr id="separator">';
-            currentHeight = -1;
+            currentHeight = -1; // so first child would be 1
             preorder(commentsChildren[i]);
         }// for
 
@@ -158,29 +200,91 @@ function loadComment(url){
         }
         resizeImage();
     });
-}
+}// loadComment
 
+/*
+ * preorder traversal through a n-ary tree with current node depth for loading child comments
+ * the comment tree is a n-ary tree where n >= 0
+ * 
+ */
 function preorder(root) {
     currentHeight++;
+    
+    // base case, no more child comments
     if (typeof root == 'undefined'){
         return;
-    }
+    }// if
+
+    // when the comment exists
     if (typeof root.data.body != 'undefined'){
+
+        // get raw text or html
+        var comment = getCommentText(root.data.body, root.data.body_html);
+
         if (currentHeight != 0) {
-            commentStr += '<p>' + '<span style="color: gray">' + currentHeight + '</span> ' + root.data.body + '</p>';
+            //commentStr += '<span style="margin-left:' + currentHeight*5 + 'px;">' + comment + '</span>';
+            var temp = '<div class="md" style="margin-left:' + (currentHeight - 1) * 5 + 'px;">';
+            commentStr += comment.replace('<div class="md">', temp);
         } else {
-            commentStr += '<p>' + root.data.body + '</p>';
-        }
+            comment = comment.replace('<div class="md">', '<div class="parent">');
+            commentStr += comment;
+        }// else
     }
+
+    // iterates through all the child
     if (typeof root.data != 'undefined' && typeof root.data.replies != 'undefined' && typeof root.data.replies.data != 'undefined') {
         for (var i=0; i<root.data.replies.data.children.length; i++) {
             if (typeof root.data.replies.data != 'undefined')
-                preorder(root.data.replies.data.children[i]);
-                currentHeight--;
+                preorder(root.data.replies.data.children[i]); // recursive call
+                currentHeight--; // reaches a parent node
         }// for
     }// if
 }// preorder
 
+
+function getSelfText(selftext, selftext_html) {
+    var selfTextResults = '';
+    if (selftext_html == null) {
+        // selfTextResults = '<p class="selftext">' + selftext + '</p>'
+        selfTextResults = selftext;
+    } else {
+        var txt = document.createElement("textarea");
+        txt.innerHTML = selftext_html
+        
+        var final_selftext = txt.value.replace('<!-- SC_OFF --><div class="md">','');
+        final_selftext = final_selftext.replace('</div><!-- SC_ON -->','');
+
+        // some how causes <p></p> to appear at the end
+        // selfTextResults = '<p class="selftext">' + final_selftext + '</p>'
+        selfTextResults = '<div>' + final_selftext + '</div>';
+
+    }// else
+    return selfTextResults;
+}// getSelfText
+
+function getCommentText(comment_text, comment_text_html) {
+    var selfTextResults = '';
+    if (comment_text_html == null) {
+        selfTextResults = comment_text;
+        //selfTextResults = '<p class="selftext">' + comment_text + '</p>'
+    } else {
+        var txt = document.createElement("textarea");
+        txt.innerHTML = comment_text_html;
+
+        selfTextResults = txt.value;
+        //selfTextResults = '<p class="selftext">' + final_selftext + '</p>'
+
+    }// else
+    return selfTextResults;
+}// getSelfText
+
+
+/*
+ * toggles dark mode
+ *
+ * changes the css for targeting elements
+ *
+ */
 function darkMode() {
     if ($('body').css('background-color') != 'rgb(0, 0, 0)') {
         $('body, input, select, button').css('background-color', 'rgb(0, 0, 0)');
@@ -191,12 +295,12 @@ function darkMode() {
         $('a').css('color', 'rgb(54, 154, 255)');
         darkModeOn = true;
     } else {
-        $('body, input, select, button').css('background-color', 'rgb(234, 234, 234)');
-        $('body, input, select, button').css('color', 'rgb(0, 0, 0)');
-        $('input, select, button').css('border-color', 'rgb(0, 0, 0)');
-        $('.navbar').css('background-color', 'rgb(255, 255, 255)');
-        $('.navbar').css('color', 'rgb(0, 0, 0)');
-        $('a').css('color', 'rgb(0, 0, 238)');
+        $('body, input, select, button').css('background-color', '');
+        $('body, input, select, button').css('color', '');
+        $('input, select, button').css('border-color', '');
+        $('.navbar').css('background-color', '');
+        $('.navbar').css('color', '');
+        $('a').css('color', '');
         darkModeOn = false;
     }
 }// darkMode

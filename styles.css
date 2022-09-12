@@ -44,8 +44,21 @@ label {
     padding: 0.4em;
 }
 
+.md {
+    border-left: 5px black solid;
+    margin: 0; /* remove */
+    padding: 0;
+    list-style-position: inside;
+}
+
+.md * {
+    margin: 0;
+    padding: 5px;
+}
+
 .images {
     height: 300px;
+    display: block;
 }
 
 .title {
@@ -53,9 +66,17 @@ label {
     cursor: pointer;
 }
 
+.selftext {
+    margin-bottom: 0;
+}
+
 #content {
     overflow: auto;
     padding-right: 10px;
+}
+
+#comments div:last-child {
+    margin-bottom: 35px;
 }
 
 #imagesize {
@@ -74,6 +95,11 @@ label {
     background-color: #333; /* Modern Browsers */
 }
 
+.thread_info {
+    margin-top: 2px;
+    margin-bottom: 0;
+}
+
 pre {
     display: inline-block;
 }
@@ -84,5 +110,5 @@ h4 {
 }
 
 p {
-    margin-top: 5px;
 }
+
