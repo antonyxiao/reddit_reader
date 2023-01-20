@@ -1,23 +1,19 @@
 /* Reddit Reader
  * @author: Antony Xiao
  * 
- * Last change: Sept 10, 2022
- * - Added indenting comment tree
- * - CSS margin changes
+ * last change: Jan 19, 2023
+ * - fixed comment highlighting after toggling dark mode
+ *
+ *
+ * change: Sept 9, 2022
+ * - Use selftext.html if it exists
+ * - improved separation <hr> lines
+ * 
+ *
+ * Future plans:
  * - use body.html for comments with surrounding tags removed
  * - fix thread header wrapping, no space during wrap
  *
- * Sept 9, 2022
- * - Use selftext.html if it exists
- * - Improved separation <hr> lines
- * - Fixed dark-mode to light-mode css not changing
- *
- *
- * Future plans:
- * - Comment left border should be white in dark mode
- * - Collapsable comments
- * - selftext_html displaying entity html on right side
- * - add points and user to comments
  */
 
 
@@ -293,6 +289,19 @@ function darkMode() {
         $('.navbar').css('background-color', 'rgb(30, 30, 30)');
         $('.navbar').css('color', 'rgb(172, 162, 149)');
         $('a').css('color', 'rgb(54, 154, 255)');
+        $('.md').css('border-left-color', '#707070');
+		$('.md').hover(
+			function() {
+				$(this).css('background-color','#222222');
+			}, function() {
+				$(this).css('background-color','');
+			}
+		);
+		/*$(".myclass").mouseover(function() {
+    $(this).find(" > div").css("background-color","red");
+}).mouseout(function() {
+    $(this).find(" > div").css("background-color","transparent");
+});*/
         darkModeOn = true;
     } else {
         $('body, input, select, button').css('background-color', '');
@@ -301,6 +310,19 @@ function darkMode() {
         $('.navbar').css('background-color', '');
         $('.navbar').css('color', '');
         $('a').css('color', '');
+        $('.md').css('border-left-color', 'black');
+        $('.md').hover(
+			function() {
+				$(this).css('background-color','#d9d9d9');
+			}, function(){
+				$(this).css('background-color','');
+			}
+		);
+		/*$(".myclass").mouseover(function() {
+    $(this).find(" > div").css("background-color","red");
+}).mouseout(function() {
+    $(this).find(" > div").css("background-color","transparent");
+});*/
         darkModeOn = false;
     }
 }// darkMode

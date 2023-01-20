@@ -1,5 +1,6 @@
 html, body {
-    font-family: sans-serif;
+    font-family: monospace;
+	font-size: 14;
     overflow: hidden;
     height: 100%;
     margin: 0;
@@ -49,6 +50,10 @@ label {
     margin: 0; /* remove */
     padding: 0;
     list-style-position: inside;
+}
+
+.md:hover {
+    background-color: #d9d9d9
 }
 
 .md * {
