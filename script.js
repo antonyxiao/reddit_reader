@@ -13,6 +13,8 @@
  * Future plans:
  * - use body.html for comments with surrounding tags removed
  * - fix thread header wrapping, no space during wrap
+ * - add loading pop up on the right screen
+ * - allow inputting of reddit link to view specified thread
  *
  */
 
